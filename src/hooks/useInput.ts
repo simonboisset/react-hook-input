@@ -10,8 +10,18 @@ const getInputValue = <T, G extends keyof T>(formValue: T, name: G, formErrors: 
   return { value, error };
 };
 
-export const useInput = <T, G extends keyof T>(form: UseFormType<T>, name: G) => {
+export const useInput = <T, G extends keyof T>(
+  form: UseFormType<T>,
+  name: G,
+  handleChange?: (value: T[G] | undefined, formvalue: T) => void
+) => {
   const { value, error } = getInputValue<T, G>(form.value, name, form.errors);
-  const onChange = (v: T[G] | undefined) => form.setFormValue({ ...form.value, [name]: v });
+  const onChange = (v: T[G] | undefined) => {
+    const nextValue = { ...form.value, [name]: v };
+    form.setFormValue(nextValue);
+    if (!!handleChange) {
+      handleChange(v, nextValue);
+    }
+  };
   return { value, error, onChange };
 };
