@@ -101,7 +101,7 @@ import { useFormContext } from 'react-hook-input';
 
 const MyCustomInput: React.FC = () => {
   const email = useFormContext<MyData, 'email'>('email');
-  const email = useFormContext<MyData, 'password'>('password');
+  const password = useFormContext<MyData, 'password'>('password');
 
   return (
     <>
@@ -110,4 +110,24 @@ const MyCustomInput: React.FC = () => {
     </>
   );
 };
+```
+
+## Add custom trigger on input changes
+
+With useInput :
+
+```tsx
+const password = useInput(form, 'password', (inputValue, formValue) => {
+  console.log('This is the new input value', inputValue);
+  console.log('This is the new form value', formValue);
+});
+```
+
+Or useFormContext :
+
+```tsx
+const password = useFormContext<MyData, 'password'>('password', (inputValue, formValue) => {
+  console.log('This is the new input value', inputValue);
+  console.log('This is the new form value', formValue);
+});
 ```
