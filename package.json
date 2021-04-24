@@ -1,6 +1,6 @@
 {
   "name": "react-hook-input",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": "Simon Boisset",
   "license": "MIT",
   "main": "dist/index.js",
