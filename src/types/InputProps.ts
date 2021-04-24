@@ -1,6 +1,5 @@
 export type InputProps<T> = {
-  value: T | undefined;
+  value: T;
   error: string | null;
-  onChange: (value: T | undefined) => void;
-  label?: string;
+  onChange: React.Dispatch<React.SetStateAction<T>>;
 };
