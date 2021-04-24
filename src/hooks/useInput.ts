@@ -24,5 +24,5 @@ export const useInput = <T, G extends keyof T>(form: UseFormType<T>, name: G, ha
     [handleChange]
   );
 
-  return { value, error, onChange };
+  return { value, error, onChange } as const;
 };
