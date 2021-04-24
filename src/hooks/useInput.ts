@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { InputProps } from '../types/InputProps';
 import { UseFormType } from '../types/UseFormType';
 
 export const useInput = <T, G extends keyof T>(form: UseFormType<T>, name: G, handleChange?: (formvalue: T) => T) => {
@@ -24,5 +25,5 @@ export const useInput = <T, G extends keyof T>(form: UseFormType<T>, name: G, ha
     [handleChange]
   );
 
-  return { value, error, onChange } as const;
+  return { value, error, onChange } as InputProps<T[G]>;
 };
