@@ -4,9 +4,9 @@ import { UseFormType } from '../types/UseFormType';
 
 const FormContext = React.createContext({});
 
-type FormProps<T> = { children: JSX.Element; form: UseFormType<T>; nested?: boolean };
+type FormProps<T> = { form: UseFormType<T>; nested?: boolean };
 
-export function Form<T>({ children, form, nested }: FormProps<T>) {
+export const Form: React.FC<FormProps<any>> = ({ children, form, nested }) => {
   const validateThenSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -19,7 +19,7 @@ export function Form<T>({ children, form, nested }: FormProps<T>) {
       {nested ? children : <form onSubmit={validateThenSubmit}>{children}</form>}
     </FormContext.Provider>
   );
-}
+};
 
 export function useFormContext<T, G extends keyof T = keyof T>(name: G, handleChange?: (formvalue: T) => T) {
   const form = useContext(FormContext) as UseFormType<T>;
