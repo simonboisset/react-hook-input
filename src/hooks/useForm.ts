@@ -1,15 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
 import { SchemaOf, ValidationError } from 'yup';
-import { InputProps } from '../types/InputProps';
 import { UseFormType } from '../types/UseFormType';
 
-export const useForm = <T>(schema: SchemaOf<T>, onSubmit?: (value: T) => void, input?: InputProps<T>) => {
+export const useForm = <T>(schema: SchemaOf<T>, onSubmit?: (value: T) => void) => {
   const defaultValue = useMemo(() => schema.getDefault() as T, []);
-  const [val, setVal] = useState<T>(defaultValue);
+  const [formValue, setFormValue] = useState<T>(defaultValue);
   const [formErrors, setFormErrors] = useState<ValidationError[] | null>(null);
-
-  const formValue = useMemo(() => (input ? input.value : val), [input, val]);
-  const setFormValue = useCallback(input ? input.onChange : setVal, [input, setVal]);
 
   const validate = useCallback(
     (value: T) => {
@@ -35,7 +31,7 @@ export const useForm = <T>(schema: SchemaOf<T>, onSubmit?: (value: T) => void, i
 
   const resetForm = useCallback(() => {
     setFormValue(defaultValue);
-  }, [defaultValue]);
+  }, [defaultValue, setFormValue]);
 
   return { value: formValue, errors: formErrors, submit, setFormValue, resetForm } as UseFormType<T>;
 };
