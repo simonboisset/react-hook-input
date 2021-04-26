@@ -2,16 +2,14 @@ import { useCallback, useMemo } from 'react';
 import { InputProps } from '../types/InputProps';
 import { UseFormType } from '../types/UseFormType';
 
-export const useInput = <T, G extends keyof T>(form: UseFormType<T>, name: G, handleChange?: (formvalue: T) => T) => {
+export const useInput = <T, G extends keyof T>(
+  form: UseFormType<T>,
+  name: G,
+  handleChange?: (formvalue: T) => T
+): InputProps<T[G]> => {
   const value: T[G] = useMemo(() => form.value[name], [form.value[name]]);
 
-  const error = useMemo(
-    () =>
-      form.errors && form.errors.filter((err) => err.path === name)[0]
-        ? form.errors.filter((err) => err.path === name)[0].message
-        : null,
-    [form.errors]
-  );
+  const error = form.errors[name];
 
   const onChange = useCallback(
     (v: T[G]) =>
@@ -22,7 +20,7 @@ export const useInput = <T, G extends keyof T>(form: UseFormType<T>, name: G, ha
         }
         return nextValue;
       }),
-    [handleChange]
+    [handleChange, name]
   );
 
   return { value, error, onChange } as InputProps<T[G]>;
