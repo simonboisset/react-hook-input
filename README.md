@@ -14,10 +14,9 @@ With react-hook-input an input component will take the InputProps :
 
 ```ts
 type InputProps<T> = {
-  value: T | undefined;
-  error: string | null;
-  onChange: (value: T | undefined) => void;
-  label?: string;
+  value: T;
+  error: T extends { [k: string]: any } ? SchemaError<T> : string | null;
+  onChange: (value: T) => void;
 };
 ```
 
@@ -74,18 +73,58 @@ const MyForm: React.FC = () => {
 
 ## Nested Form
 
-you can create a nested Form with the props `nested`. Be carefull nested form are not real input elements. You can't use submit button in nested form.
+you can create a nested Form with the props `nested`. Be carefull nested form are not real input elements.
 
 ```tsx
+import { useForm, useInput, Form, useNestedForm } from 'react-hook-input';
+
+type MyNestedFormType = {
+  status: 'ON' | 'OFF';
+  comments: string;
+};
+
+const myNestedSchema: Yup.SchemaOf<MyNestedFormType> = Yup.object().shape({
+  comments: Yup.string().default('').required(),
+  status: Yup.mixed().oneOf(['ON', 'OFF']).default('').required(),
+});
+
+type MyFormType = {
+  firstname: string;
+  lastname: string;
+  age: number;
+  extra: MyNestedFormType;
+};
+
+const mySchema: Yup.SchemaOf<MyFormType> = Yup.object().shape({
+  firstname: Yup.string().default('').required(),
+  lastname: Yup.string().default('').required(),
+  age: Yup.number().default(0).required(),
+  extra: myNestedSchema,
+});
+
 const MyNestedForm: React.FC = () => {
-  const form = useForm(MySchema, (data: MyNestedData) => mySubmitFct(data));
-  const email = useInput(form, 'email');
-  const password = useInput(form, 'password');
+  const form = useForm<MyFormType>(mySchema, (data) => console.log(data));
+
+  const inputFirstName = useInput(form, 'firstname');
+  const inputLastName = useInput(form, 'lastname');
+  const inputage = useInput(form, 'age');
+
+  const inputExtra = useInput(form, 'extra');
+  const nestedForm = useNestedForm(inputExtra);
+
+  const inputComments = useInput(nestedForm, 'comments');
+  const inputStatus = useInput(nestedForm, 'status');
 
   return (
-    <Form form={form} nested>
-      <MyInputText {...email} />
-      <MyInputText {...password} />
+    <Form form={form}>
+      <MyInputText {...inputLike} />
+      <MyInputText {...inputFirstName} />
+      <MyInputText {...inputLastName} />
+      <Form nested form={nestedForm}>
+        <MyInputText {...inputStatus} />
+        <MyInputText {...inputComments} />
+      </Form>
+      <Button type="submit">Submit</Button>
     </Form>
   );
 };
@@ -95,6 +134,7 @@ const MyNestedForm: React.FC = () => {
 
 Each Form element, are providing Context with values of inputs.
 You can use it for complex form.
+Nested contexts are also supported.
 
 ```tsx
 import { useFormContext } from 'react-hook-input';
@@ -112,22 +152,22 @@ const MyCustomInput: React.FC = () => {
 };
 ```
 
-## Add custom trigger on input changes
+## Add custom parser on input changes
 
 With useInput :
 
 ```tsx
-const password = useInput(form, 'password', (inputValue, formValue) => {
-  console.log('This is the new input value', inputValue);
+const password = useInput(form, 'password', (formValue) => {
   console.log('This is the new form value', formValue);
+  return parse(formValue);
 });
 ```
 
 Or useFormContext :
 
 ```tsx
-const password = useFormContext<MyData, 'password'>('password', (inputValue, formValue) => {
-  console.log('This is the new input value', inputValue);
+const password = useFormContext<MyData, 'password'>('password', (formValue) => {
   console.log('This is the new form value', formValue);
+  return parse(formValue);
 });
 ```
