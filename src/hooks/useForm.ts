@@ -22,17 +22,20 @@ export const useForm = <T>(schema: SchemaOf<T>, onSubmit?: (value: T) => void): 
           const path = err.path?.split('.');
           let current = error;
           if (path) {
-            for (const key of path) {
-              //@ts-ignore
-              if (!current[key]) {
+            path.forEach((key, i) => {
+              if (i === path.length - 1) {
                 //@ts-ignore
-                current[key] = {};
+                current[key] = err.message;
+              } else {
+                //@ts-ignore
+                if (!current[key]) {
+                  //@ts-ignore
+                  current[key] = {};
+                }
+                //@ts-ignore
+                current = current[key];
               }
-              //@ts-ignore
-              current = current[key];
-            }
-            //@ts-ignore
-            current = err.message;
+            });
           }
         }
       }
