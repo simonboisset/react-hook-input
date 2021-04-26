@@ -15,7 +15,8 @@
     "build": "tsdx build",
     "test": "tsdx test --passWithNoTests",
     "lint": "tsdx lint",
-    "write": "yarn prettier --write ./src"
+    "write": "yarn prettier --write ./src",
+    "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
     "react": ">=16",
