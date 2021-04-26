@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 import { SchemaOf, ValidationError } from 'yup';
+import { SchemaError } from '../types/SchemaError';
 import { UseFormType } from '../types/UseFormType';
 
-export const useForm = <T>(schema: SchemaOf<T>, onSubmit?: (value: T) => void) => {
+export const useForm = <T>(schema: SchemaOf<T>, onSubmit?: (value: T) => void): UseFormType<T> => {
   const defaultValue = useMemo(() => schema.getDefault() as T, []);
   const [formValue, setFormValue] = useState<T>(defaultValue);
-  const [formErrors, setFormErrors] = useState<ValidationError[] | null>(null);
+  const [formErrors, setFormErrors] = useState<SchemaError<T>>({});
 
   const validate = useCallback(
     (value: T) => {
@@ -15,7 +16,28 @@ export const useForm = <T>(schema: SchemaOf<T>, onSubmit?: (value: T) => void) =
       } catch (errors) {
         nextError = errors.inner as ValidationError[];
       }
-      setFormErrors(nextError);
+      let error: SchemaError<T> = {};
+      if (nextError) {
+        for (const err of nextError) {
+          const path = err.path?.split('.');
+          let current = error;
+          if (path) {
+            for (const key of path) {
+              //@ts-ignore
+              if (!current[key]) {
+                //@ts-ignore
+                current[key] = {};
+              }
+              //@ts-ignore
+              current = current[key];
+            }
+            //@ts-ignore
+            current = err.message;
+          }
+        }
+      }
+
+      setFormErrors(error);
       const isValid = !nextError;
       return isValid;
     },
