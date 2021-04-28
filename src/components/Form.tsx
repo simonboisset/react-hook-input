@@ -1,32 +1,20 @@
-import React, { useCallback, useContext } from 'react';
-import { useInput } from '../hooks/useInput';
-import { InputProps } from '../types/InputProps';
-import { UseFormType } from '../types/UseFormType';
+import React, { useContext } from 'react';
+import { FieldsType } from '../hooks/useForm';
 
 const FormContext = React.createContext({});
 
-type FormProps<T> = { form: UseFormType<T>; nested?: boolean };
+type FormProps<T> = {
+  submit?: (e: React.FormEvent<HTMLFormElement>) => void;
+} & FieldsType<T>;
 
-export const Form: React.FC<FormProps<any>> = ({ children, form, nested }) => {
-  const validateThenSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      form.submit();
-    },
-    [form.submit]
-  );
+export const Form: React.FC<FormProps<any>> = ({ children, submit, ...other }) => {
   return (
-    <FormContext.Provider value={form}>
-      {nested ? children : <form onSubmit={validateThenSubmit}>{children}</form>}
+    <FormContext.Provider value={other}>
+      {!submit ? children : <form onSubmit={submit}>{children}</form>}
     </FormContext.Provider>
   );
 };
 
-export function useFormContext<T, G extends keyof T = keyof T>(
-  name: G,
-  handleChange?: (formvalue: T) => T
-): InputProps<T[G]> {
-  const form = useContext(FormContext) as UseFormType<T>;
-  const value = useInput<T, G>(form, name, handleChange);
-  return value as InputProps<T[G]>;
+export function useFormContext<T>() {
+  return useContext(FormContext) as FieldsType<T>;
 }

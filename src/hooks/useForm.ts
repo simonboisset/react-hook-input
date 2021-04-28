@@ -1,22 +1,29 @@
 import { useCallback, useMemo, useState } from 'react';
-import { SchemaOf, ValidationError } from 'yup';
+import { Asserts, SchemaOf, ValidationError } from 'yup';
+import { InputProps } from '../types/InputProps';
 import { SchemaError } from '../types/SchemaError';
-import { UseFormType } from '../types/UseFormType';
+import { fieldsFactory } from '../utils/fieldsFactory';
 
-export const useForm = <T>(schema: SchemaOf<T>, onSubmit?: (value: T) => void): UseFormType<T> => {
-  const defaultValue = useMemo(() => schema.getDefault() as T, []);
-  const [formValue, setFormValue] = useState<T>(defaultValue);
-  const [formErrors, setFormErrors] = useState<SchemaError<T>>({});
+export type FieldsType<T> = { [key in keyof Asserts<SchemaOf<T>>]: InputProps<Asserts<SchemaOf<T>>[key]> };
+
+export type UseFormType<T> = {
+  submit: (e: React.FormEvent<HTMLFormElement>) => void;
+} & FieldsType<T>;
+
+export const useForm = <T>(schema: SchemaOf<T>, onSubmit?: (value: Asserts<typeof schema>) => void): UseFormType<T> => {
+  const defaultValue = useMemo(() => schema.getDefault() as Asserts<typeof schema>, []);
+  const [formValue, setFormValue] = useState<Asserts<typeof schema>>(defaultValue);
+  const [formErrors, setFormErrors] = useState<SchemaError<Asserts<typeof schema>>>({});
 
   const validate = useCallback(
-    (value: T) => {
+    (value: Asserts<typeof schema>) => {
       let nextError: ValidationError[] | null = null;
       try {
         schema.validateSync(value, { abortEarly: false, stripUnknown: true });
       } catch (errors) {
         nextError = errors.inner as ValidationError[];
       }
-      let error: SchemaError<T> = {};
+      let error: SchemaError<Asserts<typeof schema>> = {};
       if (nextError) {
         for (const err of nextError) {
           const path = err.path?.split('.');
@@ -47,16 +54,16 @@ export const useForm = <T>(schema: SchemaOf<T>, onSubmit?: (value: T) => void): 
     [schema]
   );
 
-  const submit = useCallback(() => {
-    const isValid = validate(formValue);
-    if (isValid && !!onSubmit) {
-      onSubmit(formValue);
-    }
-  }, [formValue, validate, onSubmit]);
+  const submit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const isValid = validate(formValue);
+      if (isValid && !!onSubmit) {
+        onSubmit(formValue);
+      }
+    },
+    [formValue, validate, onSubmit]
+  );
 
-  const resetForm = useCallback(() => {
-    setFormValue(defaultValue);
-  }, [defaultValue, setFormValue]);
-
-  return { value: formValue, errors: formErrors, submit, setFormValue, resetForm } as UseFormType<T>;
+  return { submit, ...fieldsFactory(formValue, setFormValue, formErrors) };
 };
