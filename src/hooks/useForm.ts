@@ -65,5 +65,5 @@ export const useForm = <T>(schema: SchemaOf<T>, onSubmit?: (value: Asserts<typeo
     [formValue, validate, onSubmit]
   );
 
-  return { submit, ...fieldsFactory(formValue, setFormValue, formErrors) };
+  return { submit, ...fieldsFactory(formValue, setFormValue, formErrors, setFormErrors) };
 };
