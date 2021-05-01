@@ -1,12 +1,9 @@
 import { InputProps } from '../types/InputProps';
-import { UseFormType } from '../types/UseFormType';
+import { fieldsFactory } from '../utils/fieldsFactory';
 
-export const useNestedForm = <T>(input: InputProps<T>): UseFormType<T> => {
+export const useNestedForm = <T extends { [k: string]: any }>(input: InputProps<T>) => {
+  const error = !input.error || typeof input.error === 'string' ? {} : input.error;
   return {
-    value: input.value,
-    errors: input.error,
-    submit: () => {},
-    setFormValue: input.onChange,
-    resetForm: () => {},
-  } as UseFormType<T>;
+    ...fieldsFactory(input.value, input.onChange, error),
+  };
 };

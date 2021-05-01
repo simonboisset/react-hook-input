@@ -1,7 +1,7 @@
-import { SchemaError } from './SchemaError';
+import { InputError } from './InputError';
 
 export interface InputProps<T> {
   value: T;
-  error: T extends { [k: string]: any } ? SchemaError<T> : string | null;
+  error?: InputError<T>;
   onChange: (value: T) => void;
 }
