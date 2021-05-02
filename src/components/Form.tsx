@@ -5,11 +5,12 @@ const FormContext = React.createContext({});
 
 type FormProps<T> = {
   submit?: (e: React.FormEvent<HTMLFormElement>) => void;
-} & FieldsType<T>;
+  value: FieldsType<T>;
+};
 
-export const Form: React.FC<FormProps<any>> = ({ children, submit, ...other }) => {
+export const Form: React.FC<FormProps<any>> = ({ children, submit, value }) => {
   return (
-    <FormContext.Provider value={other}>
+    <FormContext.Provider value={value}>
       {!submit ? children : <form onSubmit={submit}>{children}</form>}
     </FormContext.Provider>
   );
