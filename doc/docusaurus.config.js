@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
   module.exports = {
     title: 'react-hook-input',
     tagline: 'Make your form easyer',
-    url: 'react-hook-input.simonboisset.com',
+    url: 'https://react-hook-input.simonboisset.com',
     baseUrl: '/',
     onBrokenLinks: 'throw',
     onBrokenMarkdownLinks: 'warn',
