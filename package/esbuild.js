@@ -3,10 +3,13 @@ const esbuild = require('esbuild');
 esbuild
   .build({
     entryPoints: ['./src/index.ts'],
-    outfile: 'dist/index.js',
+    outdir: 'dist',
     bundle: true,
+    sourcemap: true,
     minify: true,
+    treeShaking: true,
+    splitting: true,
     format: 'esm',
-    platform: 'node',
+    target: ['esnext'],
   })
   .catch(() => process.exit(1));
