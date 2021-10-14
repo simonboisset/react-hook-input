@@ -26,47 +26,49 @@ export function formReducer<T>(state: FormValue<T>, action: Action<T>) {
     case 'reset': {
       return action.initialValue;
     }
-    case 'submit': {
-      action.e.preventDefault();
-      let formValue = { ...state };
-      const value = formValueToSchemaValue(formValue);
-      let nextError: ValidationError[] | null = null;
-      try {
-        action.schema.validateSync(value, { abortEarly: false, stripUnknown: true });
-      } catch (errors) {
-        nextError = errors.inner as ValidationError[];
-      }
-      if (nextError) {
-        let errors: SchemaError<T> = {};
-        for (const err of nextError) {
-          const path = err.path?.split('.');
-          let current = errors;
-          if (path) {
-            path.forEach((key, i) => {
-              if (i === path.length - 1) {
-                //@ts-ignore
-                current[key] = err.message;
-              } else {
-                //@ts-ignore
-                if (!current[key]) {
+    case 'submit':
+      {
+        action.e.preventDefault();
+        let formValue = { ...state };
+        const value = formValueToSchemaValue(formValue);
+        let nextError: ValidationError[] | null = null;
+        try {
+          action.schema.validateSync(value, { abortEarly: false, stripUnknown: true });
+        } catch (errors) {
+          nextError = errors.inner as ValidationError[];
+        }
+        if (nextError) {
+          let errors: SchemaError<T> = {};
+          for (const err of nextError) {
+            const path = err.path?.split('.');
+            let current = errors;
+            if (path) {
+              path.forEach((key, i) => {
+                if (i === path.length - 1) {
                   //@ts-ignore
-                  current[key] = {};
+                  current[key] = err.message;
+                } else {
+                  //@ts-ignore
+                  if (!current[key]) {
+                    //@ts-ignore
+                    current[key] = {};
+                  }
+                  //@ts-ignore
+                  current = current[key];
                 }
-                //@ts-ignore
-                current = current[key];
-              }
-            });
+              });
+            }
           }
+          for (const key in errors) {
+            formValue[key].error = errors[key];
+          }
+          return formValue;
         }
-        for (const key in errors) {
-          formValue[key].error = errors[key];
+        if (!!action.onSubmit) {
+          action.onSubmit(value);
+          return formValue;
         }
-        return formValue;
       }
-      if (!!action.onSubmit) {
-        action.onSubmit(value);
-        return formValue;
-      }
-    }
+      return null;
   }
 }
