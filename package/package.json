@@ -4,7 +4,6 @@
   "author": "Simon Boisset",
   "license": "MIT",
   "main": "dist/index.js",
-  "module": "dist/react-hook-input.esm.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"

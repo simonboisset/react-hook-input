@@ -1,5 +1,5 @@
 import { ValidationError } from 'yup';
-import { Action, FormValue, SchemaError } from './types';
+import { Action, FormValue } from './types';
 
 const formValueToSchemaValue = <T>(formValue: FormValue<T>): T => {
   let value = {} as T;
@@ -14,13 +14,6 @@ export function formReducer<T>(state: FormValue<T>, action: Action<T>) {
     case 'change': {
       let value = { ...state };
       value[action.name] = { value: action.value };
-      return value;
-    }
-    case 'error': {
-      let value = { ...state };
-      for (const key in action.errors) {
-        value[key].error = action.errors[key];
-      }
       return value;
     }
     case 'reset': {
@@ -38,29 +31,11 @@ export function formReducer<T>(state: FormValue<T>, action: Action<T>) {
           nextError = errors.inner as ValidationError[];
         }
         if (nextError) {
-          let errors: SchemaError<T> = {};
-          for (const err of nextError) {
-            const path = err.path?.split('.');
-            let current = errors;
-            if (path) {
-              path.forEach((key, i) => {
-                if (i === path.length - 1) {
-                  //@ts-ignore
-                  current[key] = err.message;
-                } else {
-                  //@ts-ignore
-                  if (!current[key]) {
-                    //@ts-ignore
-                    current[key] = {};
-                  }
-                  //@ts-ignore
-                  current = current[key];
-                }
-              });
+          for (const error of nextError) {
+            const key = error.path as keyof T | undefined;
+            if (key) {
+              formValue[key].error = error.message;
             }
-          }
-          for (const key in errors) {
-            formValue[key].error = errors[key];
           }
           return formValue;
         }
