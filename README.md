@@ -1,5 +1,7 @@
 # react-hook-input
 
+This repos is deprecated. You can folow my new repos for form validation [here](https://github.com/simonboisset/ts-v)
+
 React Hooks for validation form
 
 ## Get Started
